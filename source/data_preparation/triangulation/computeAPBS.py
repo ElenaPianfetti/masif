@@ -22,10 +22,10 @@ def computeAPBS(vertices, pdb_file, tmp_file_base):
     """
         Calls APBS, pdb2pqr, and multivalue and returns the charges per vertex
     """
-    fields = tmp_file_base.split("/")[0:-1]
-    directory = "/".join(fields) + "/"
-    filename_base = tmp_file_base.split("/")[-1]
-    pdbname = pdb_file.split("/")[-1]
+    # ---------- PD2PQR ----------
+    filename_base = pdb_file.split("/")[-1].split(".")[0]
+    pdb_id = filename_base.split("_")[0]
+    directory = 'data_processing/00-raw_pdbs/'
     args = [
         "python",
         "-m",
@@ -34,43 +34,54 @@ def computeAPBS(vertices, pdb_file, tmp_file_base):
         "--whitespace",
         "--noopt",
         "--apbs-input",
-        "/work/H2020DeciderFicarra/epianfetti/masif/data_preparation/00-raw_pdbs/testapbs.in",
-        "/work/H2020DeciderFicarra/epianfetti/masif/data_preparation/00-raw_pdbs/1AKJ.pdb",
-        "/work/H2020DeciderFicarra/epianfetti/masif/data_preparation/00-raw_pdbs/1AKJ.out"
+        f"{filename_base}.in",
+        f"{pdb_id}.pdb",
+        filename_base
     ]
+    print(f"Running:\n{' '.join(args)}")
     p2 = Popen(args, stdout=PIPE, stderr=PIPE, cwd=directory)
     stdout, stderr = p2.communicate()
     print(stderr.decode("utf-8"))
     print(stdout.decode("utf-8"))
 
-    args = [apbs_bin, "/work/H2020DeciderFicarra/epianfetti/masif/data_preparation/00-raw_pdbs/testapbs.in", 'test.out']
+    # ---------- APBS ----------
+    args = [apbs_bin, f"{filename_base}.in", '--output-file=test.out']
+    print(f"Running:\n{' '.join(args)}")
     p2 = Popen(args, stdout=PIPE, stderr=PIPE, cwd=directory)
     stdout, stderr = p2.communicate()
 
     print(stderr.decode("utf-8"))
     print(stdout.decode("utf-8"))
 
-    # vertfile = open(directory + "/" + filename_base + ".csv", "w")
-    # for vert in vertices:
-    #     vertfile.write("{},{},{}\n".format(vert[0], vert[1], vert[2]))
-    # vertfile.close()
+    print(f'Saving vertices to file {os.path.join(directory, filename_base + ".csv")}')
+    vertfile = open(os.path.join(directory, filename_base + ".csv"), "w")
+    for vert in vertices:
+        vertfile.write("{},{},{}\n".format(vert[0], vert[1], vert[2]))
+    vertfile.close()
 
-    # args = [
-    #     multivalue_bin,
-    #     filename_base + ".csv",
-    #     filename_base + ".dx",
-    #     filename_base + "_out.csv",
-    # ]
-    # p2 = Popen(args, stdout=PIPE, stderr=PIPE, cwd=directory)
-    # stdout, stderr = p2.communicate()
+    # ---------- MULTIVALUE ----------
+    args = [
+        multivalue_bin,
+        filename_base + ".csv",
+        filename_base + ".dx",
+        filename_base + "_out.csv",
+    ]
+    print(f"Running:\n{' '.join(args)}")
+    p2 = Popen(args, stdout=PIPE, stderr=PIPE, cwd=directory)
+    stdout, stderr = p2.communicate()
 
-    # # Read the charge file
-    # chargefile = open(tmp_file_base + "_out.csv")
-    # charges = numpy.array([0.0] * len(vertices))
-    # for ix, line in enumerate(chargefile.readlines()):
-    #     charges[ix] = float(line.split(",")[3])
+    print(stderr.decode("utf-8"))
+    print(stdout.decode("utf-8"))
 
+    # Read the charge file
+    chargefile = open(os.path.join(directory, filename_base + "_out.csv"))
+    charges = numpy.array([0.0] * len(vertices))
+    for ix, line in enumerate(chargefile.readlines()):
+        charges[ix] = float(line.split(",")[3])
+
+    # ---------- CLEANUP ----------
     # remove_fn = os.path.join(directory, filename_base)
+    # print(f"Removing files: {remove_fn}")
     # os.remove(remove_fn)
     # os.remove(remove_fn + '.csv')
     # os.remove(remove_fn + '.dx')
@@ -78,5 +89,4 @@ def computeAPBS(vertices, pdb_file, tmp_file_base):
     # os.remove(remove_fn + '-input.p')
     # os.remove(remove_fn + '_out.csv')
 
-    # return charges
-    return 0
+    return charges

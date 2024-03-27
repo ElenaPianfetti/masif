@@ -2,3 +2,4 @@
 third_party_libraries/
 data_processing/
 tmp_masif/
+*.pyc
