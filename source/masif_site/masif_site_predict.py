@@ -9,13 +9,15 @@ from masif_modules.train_masif_site import run_masif_site
 from default_config.masif_opts import masif_opts
 
 """
-masif_site_predict.py: Evaluate one or multiple proteins on MaSIF-site. 
+masif_site_predict.py: Evaluate one or multiple proteins on MaSIF-site.
 Pablo Gainza - LPDI STI EPFL 2019
 This file is part of MaSIF.
 Released under an Apache License 2.0
 """
 
 # Apply mask to input_feat
+
+
 def mask_input_feat(input_feat, mask):
     mymask = np.where(np.array(mask) == 0.0)[0]
     return np.delete(input_feat, mymask, axis=2)
@@ -96,7 +98,7 @@ for ppi_pair_id in ppi_pair_ids:
 
         try:
             rho_wrt_center = np.load(in_dir + pid + "_rho_wrt_center.npy")
-        except:
+        except BaseException:
             print("File not found: {}".format(in_dir + pid + "_rho_wrt_center.npy"))
             continue
         theta_wrt_center = np.load(in_dir + pid + "_theta_wrt_center.npy")
@@ -124,9 +126,8 @@ for ppi_pair_id in ppi_pair_ids:
                 len(scores[0])
             )
         )
-        print("GPU time (real time, not actual GPU time): {:.3f}s".format(toc-tic))
+        print("GPU time (real time, not actual GPU time): {:.3f}s".format(toc - tic))
         np.save(
             params["out_pred_dir"] + "/pred_" + pdbid + "_" + chains[ix] + ".npy",
             scores,
         )
-

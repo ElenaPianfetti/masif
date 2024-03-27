@@ -10,6 +10,8 @@ import sys
 # Released under an Apache License 2.0
 
 # Compute the histogram of distance-dependent curvature.
+
+
 def compute_dfss_histogram(rho, ddc, mask):
     # Bin it
     histogram = np.zeros((4, 15))
@@ -54,7 +56,7 @@ for ppi_pair_id in list_file:
             feat = np.load(mydir + "/" + pid + "_input_feat.npy")[:, :, 1]
             mask = np.load(mydir + "/" + pid + "_mask.npy")
             rho = np.load(mydir + "/" + pid + "_rho_wrt_center.npy")
-        except:
+        except BaseException:
             print("Error opening {}".format(ppi_pair_id))
             continue
         myoutdir = os.path.join(out_dir, ppi_pair_id)

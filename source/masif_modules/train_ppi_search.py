@@ -8,6 +8,8 @@ from IPython.core.debugger import set_trace
 from sklearn.metrics import accuracy_score, roc_auc_score
 
 # Features and theta are flipped for the binder in construct_batch (except for hydrophobicity).
+
+
 def construct_batch(
     binder_rho_wrt_center,
     binder_theta_wrt_center,
@@ -108,7 +110,7 @@ def construct_batch_val_test(
     batch_theta_coords = np.expand_dims(theta_wrt_center[c_idx], 2)
     batch_input_feat = input_feat[c_idx]
     batch_mask = mask[c_idx]
-    batch_mask = np.expand_dims(batch_mask,2)
+    batch_mask = np.expand_dims(batch_mask, 2)
     # Flip features and theta (except hydrophobicity)
     if flip:
         batch_input_feat = -batch_input_feat
@@ -310,7 +312,7 @@ def train_ppi_search(
         try:
             pos_score = score[:n]
             neg_score = score[n:]
-        except:
+        except BaseException:
             print(score)
             sys.exit(1)
         iter_pos_score = np.concatenate([pos_score, iter_pos_score], axis=0)
@@ -386,7 +388,7 @@ def train_ppi_search(
             neg_dists = compute_dists(neg_desc, neg_desc_2)
             try:
                 val_auc = 1 - compute_roc_auc(pos_dists, neg_dists)
-            except:
+            except BaseException:
                 print(np.min(pos_dists))
                 print(np.min(neg_dists))
                 sys.exit(1)
@@ -476,4 +478,3 @@ def train_ppi_search(
                 np.save(out_dir + "neg_desc.npy", neg_desc)
                 np.save(out_dir + "neg_test_idx.npy", neg_test_idx)
                 np.save(out_dir + "neg_desc_2.npy", neg_desc_2)
-

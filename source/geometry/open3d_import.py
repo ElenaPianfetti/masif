@@ -29,4 +29,3 @@ else:
     TransformationEstimationPointToPlane = o3d.TransformationEstimationPointToPlane
     RANSACConvergenceCriteria = o3d.RANSACConvergenceCriteria
     KDTreeFlann = o3d.KDTreeFlann
-

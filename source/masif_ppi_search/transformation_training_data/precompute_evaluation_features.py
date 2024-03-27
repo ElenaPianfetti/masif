@@ -12,6 +12,8 @@ Released under an Apache License 2.0
 """
 
 # @dask.delayed
+
+
 def save_nn(d):
     """ Computes nearest neighbours of points on aligned patches on target patch"""
 

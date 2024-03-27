@@ -54,7 +54,7 @@ with tf.Session() as sess:
     for num_test_sample in range(num_test_samples):
         try:
             data_element = sess.run(testing_next_element)
-        except:
+        except BaseException:
             continue
 
         print(num_test_sample)
@@ -105,4 +105,3 @@ with tf.Session() as sess:
             pdb_logits_softmax.append(samples_logits_softmax)
         np.save(test_set_out_dir + "{}_labels.npy".format(pdb), pdb_labels)
         np.save(test_set_out_dir + "{}_logits.npy".format(pdb), pdb_logits_softmax)
-

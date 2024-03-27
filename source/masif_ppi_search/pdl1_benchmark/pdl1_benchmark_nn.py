@@ -16,21 +16,21 @@ import sys
 
 # import the right version of open3d
 from geometry.open3d_import import PointCloud, read_point_cloud, \
-        Vector3dVector, Feature, registration_ransac_based_on_feature_matching, \
-       TransformationEstimationPointToPoint, CorrespondenceCheckerBasedOnEdgeLength, \
-      CorrespondenceCheckerBasedOnDistance, CorrespondenceCheckerBasedOnNormal, \
-     RANSACConvergenceCriteria 
+    Vector3dVector, Feature, registration_ransac_based_on_feature_matching, \
+    TransformationEstimationPointToPoint, CorrespondenceCheckerBasedOnEdgeLength, \
+    CorrespondenceCheckerBasedOnDistance, CorrespondenceCheckerBasedOnNormal, \
+    RANSACConvergenceCriteria
 
 # Local imports
 from default_config.masif_opts import masif_opts
 from alignment_utils_masif_search import get_patch_geo, multidock, \
-        subsample_patch_coords, compute_nn_score, get_target_vix
+    subsample_patch_coords, compute_nn_score, get_target_vix
 from transformation_training_data.score_nn import ScoreNN
 
 """
 Hard-coded configuration, change accordingly!"
 
-Target name - hard coded and tested with PD-L1 (PDB id: 4ZQK). You can change you your own target and test. 
+Target name - hard coded and tested with PD-L1 (PDB id: 4ZQK). You can change you your own target and test.
 In general this will work well with targets where MaSIF-site labels the site well and where there is a high
 amount of shape complementarity
 """
@@ -38,23 +38,25 @@ target_name = "4ZQK_A"
 target_ppi_pair_id = "4ZQK_A_B"
 
 """
-Descriptor cutoff: This is the key parameter for the speed of the method. The lower the value, 
+Descriptor cutoff: This is the key parameter for the speed of the method. The lower the value,
 the faster the method, but also the higher the number of false negatives. Values ABOVE
-this cutoff are discareded. Recommended values: 1.7-2.2. 
+this cutoff are discareded. Recommended values: 1.7-2.2.
 """
-DESC_DIST_CUTOFF=1.7
+DESC_DIST_CUTOFF = 1.7
 
 """
 Iface cutoff: Patches are also filtered by their MaSIF-site score. Patches whose center
-point has a value BELOW this score are discarded. 
-The higher the value faster the method, but also the higher the number of false negatives. 
+point has a value BELOW this score are discarded.
+The higher the value faster the method, but also the higher the number of false negatives.
 Recommended values: 0.8
 """
-IFACE_CUTOFF=0.8
+IFACE_CUTOFF = 0.8
+
 
 def blockPrint():
     sys.stdout = open(os.devnull, "w")
     sys.stderr = open(os.devnull, "w")
+
 
 def enablePrint():
     sys.stdout = sys.__stdout__
@@ -87,10 +89,6 @@ pdb_dir = os.path.join(top_dir, masif_opts["pdb_chain_dir"])
 precomp_dir = os.path.join(
     top_dir, masif_opts["site"]["masif_precomputation_dir"]
 )
-
-
-
-
 
 
 # Go through every 9A patch in top_dir -- get the one with the highest iface mean 12A around it.
@@ -139,7 +137,7 @@ def match_descriptors(
                     pdb_chain_id = fields[0] + "_" + fields[2]
                 iface = np.load(in_iface_dir + "/pred_" + pdb_chain_id + ".npy")[0]
                 descs = np.load(mydescdir + "/" + pid + "_desc_straight.npy")
-            except:
+            except BaseException:
                 continue
             print(pdb_chain_id)
             name = (ppi_pair_id, pid)
@@ -160,6 +158,7 @@ def match_descriptors(
 
     print("Iterated over {} proteins.".format(count_proteins))
     return all_matched_names, all_matched_vix, all_matched_desc_dist, count_proteins
+
 
 def align_and_save(
     out_filename_base,
@@ -188,7 +187,8 @@ def align_and_save(
 
     return 0
 
-## Load the structures of the target
+
+# Load the structures of the target
 target_pdb_id = "4ZQK"
 target_chain = "A"
 target_pdb_dir = pdb_dir
@@ -253,8 +253,8 @@ for name in matched_dict.keys():
     source_vix = matched_dict[name]
 #    try:
     source_coords = subsample_patch_coords(
-            ppi_pair_id, pid,precomp_dir, cv=source_vix, 
-        )
+        ppi_pair_id, pid, precomp_dir, cv=source_vix,
+    )
 #    except:
 #    print("Coordinates not found. continuing.")
 #    continue
@@ -273,7 +273,7 @@ for name in matched_dict.keys():
         target_patch_descs,
         target_ckdtree,
         nn_model,
-        use_icp = True 
+        use_icp=True
     )
     scores = np.asarray(all_source_scores)
     desc_scores.append(scores)
@@ -309,4 +309,3 @@ for name in matched_dict.keys():
 
 end_time = time.time()
 out_log.write("Took {}s\n".format(end_time - start_time))
-

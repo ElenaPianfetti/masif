@@ -37,12 +37,12 @@ with open(
 ) as f:
     testing_list = f.read().splitlines()
 
-n_positives = 1 # Number of correctly aligned to train on
-n_negatives = 200 # Number of incorrectly aligned
+n_positives = 1  # Number of correctly aligned to train on
+n_negatives = 200  # Number of incorrectly aligned
 max_rmsd = 5.0
 max_npoints = 200
 n_features = 3
-data_list = glob.glob(data_dir+'*')
+data_list = glob.glob(data_dir + '*')
 data_list = [
     d
     for d in data_list
@@ -88,7 +88,7 @@ for i, d in enumerate(data_list):
     chosen_alignments = np.concatenate([chosen_positives, chosen_negatives])
     try:
         features = np.load(d + "/" + "features.npy", encoding="latin1", allow_pickle=True)
-    except:
+    except BaseException:
         continue
     n_sources = len(features)
     features = features[chosen_alignments]
@@ -107,9 +107,9 @@ for i, d in enumerate(data_list):
     ).reshape(-1, 1)
 
     all_features[
-        n_samples : n_samples + len(chosen_alignments), :, :
+        n_samples: n_samples + len(chosen_alignments), :, :
     ] = features_trimmed
-    all_labels[n_samples : n_samples + len(chosen_alignments)] = labels
+    all_labels[n_samples: n_samples + len(chosen_alignments)] = labels
     n_samples += len(chosen_alignments)
 
 all_features = all_features[:n_samples]
@@ -181,5 +181,5 @@ history = model.fit(
     callbacks=callbacks,
 )
 
-#with open("histories/history_dict_3feat_new.pkl", "wb") as f:
+# with open("histories/history_dict_3feat_new.pkl", "wb") as f:
 #    pickle.dump(history.history, f)

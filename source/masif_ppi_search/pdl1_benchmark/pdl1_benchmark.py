@@ -27,6 +27,7 @@ def blockPrint():
     sys.stdout = open(os.devnull, "w")
     sys.stderr = open(os.devnull, "w")
 
+
 def enablePrint():
     sys.stdout = sys.__stdout__
     sys.stderr = sys.__stderr__
@@ -50,11 +51,13 @@ precomp_dir = os.path.join(
 )
 
 # Extract a geodesic patch.
+
+
 def get_patch_geo(
     pcd, patch_coords, center, descriptors, outward_shift=0.25, flip=False
 ):
     """
-        Get a patch based on geodesic distances. 
+        Get a patch based on geodesic distances.
         pcd: the point cloud.
         patch_coords: the geodesic distances.
         center: the index of the center of the patch
@@ -66,10 +69,10 @@ def get_patch_geo(
     idx = patch_coords[center]
     try:
         pts = np.asarray(pcd.points)[idx, :]
-    except:
+    except BaseException:
         set_trace()
     nrmls = np.asarray(pcd.normals)[idx, :]
-    # Expand the surface in the direction of the normals. 
+    # Expand the surface in the direction of the normals.
     pts = pts + outward_shift * nrmls
     if flip:
         nrmls = -np.asarray(pcd.normals)[idx, :]
@@ -81,6 +84,7 @@ def get_patch_geo(
     patch_descs.data = descriptors[idx, :].T
     return patch, patch_descs
 
+
 def subsample_patch_coords(top_dir, pdb, pid, cv=None, frac=1.0, radius=12.0):
     """
         subsample_patch_coords: Read the geodesic coordinates in an easy to access format.
@@ -89,9 +93,9 @@ def subsample_patch_coords(top_dir, pdb, pid, cv=None, frac=1.0, radius=12.0):
         cv: central vertex (list of patches to select; if None, select all)
     """
     if cv is None:
-        pc = np.load(os.path.join(top_dir, pdb, pid+'_list_indices.npy'))
+        pc = np.load(os.path.join(top_dir, pdb, pid + '_list_indices.npy'))
     else:
-        temp = np.load(os.path.join(top_dir, pdb, pid+'_list_indices.npy'))[cv]
+        temp = np.load(os.path.join(top_dir, pdb, pid + '_list_indices.npy'))[cv]
         pc = {}
         for ix, key in enumerate(cv):
             pc[key] = temp[ix]
@@ -170,7 +174,7 @@ def match_descriptors(
                     pdb_chain_id = fields[0] + "_" + fields[2]
                 iface = np.load(in_iface_dir + "/pred_" + pdb_chain_id + ".npy")[0]
                 descs = np.load(mydescdir + "/" + pid + "_desc_straight.npy")
-            except:
+            except BaseException:
                 continue
             print(pdb_chain_id)
             name = (ppi_pair_id, pid)
@@ -366,7 +370,7 @@ def compute_desc_dist_score(
         source_p = corr[:, 0]
         try:
             dists_cutoff = target_desc.data[:, target_p] - source_desc.data[:, source_p]
-        except:
+        except BaseException:
             set_trace()
         dists_cutoff = np.sqrt(np.sum(np.square(dists_cutoff.T), axis=1))
         inliers = len(corr)
@@ -378,7 +382,7 @@ def compute_desc_dist_score(
     return np.array([scores_corr, inliers, scores_corr_mean, scores_corr_cube]).T
 
 
-## Load the structures of the target
+# Load the structures of the target
 target_pdb_id = "4ZQK"
 target_chain = "A"
 target_pdb_dir = pdb_dir
@@ -451,8 +455,8 @@ for name in matched_dict.keys():
     source_vix = matched_dict[name]
 #    try:
     source_coords = subsample_patch_coords(
-            precomp_dir, ppi_pair_id, pid, cv=source_vix, 
-        )
+        precomp_dir, ppi_pair_id, pid, cv=source_vix,
+    )
 #    except:
 #        print("Coordinates not found. continuing.")
 #        continue
@@ -507,4 +511,3 @@ for name in matched_dict.keys():
 
 end_time = time.time()
 out_log.write("Took {}s\n".format(end_time - start_time))
-

@@ -11,7 +11,7 @@ from sklearn.metrics import confusion_matrix
 import tensorflow as tf
 
 """
-masif_ligand_train.py: Train MaSIF-ligand. 
+masif_ligand_train.py: Train MaSIF-ligand.
 Freyr Sverrisson - LPDI STI EPFL 2019
 Released under an Apache License 2.0
 """
@@ -71,7 +71,7 @@ with tf.Session() as sess:
         for num_train_sample in range(int(num_training_samples / 10)):
             try:
                 data_element = sess.run(training_next_element)
-            except:
+            except BaseException:
                 continue
             labels = data_element[4]
             n_ligands = labels.shape[1]
@@ -128,7 +128,7 @@ with tf.Session() as sess:
         for num_val_sample in range(num_validation_samples):
             try:
                 data_element = sess.run(validation_next_element)
-            except:
+            except BaseException:
                 continue
             labels = data_element[4]
             n_ligands = labels.shape[1]
@@ -184,7 +184,7 @@ with tf.Session() as sess:
         for num_test_sample in range(num_testing_samples):
             try:
                 data_element = sess.run(testing_next_element)
-            except:
+            except BaseException:
                 continue
             labels = data_element[4]
             n_ligands = labels.shape[1]
@@ -241,7 +241,7 @@ with tf.Session() as sess:
         for num_sample in range(num_training_samples):
             try:
                 data_element = sess.run(training_next_element)
-            except:
+            except BaseException:
                 continue
             labels = data_element[4]
             n_ligands = labels.shape[1]
@@ -300,4 +300,3 @@ with tf.Session() as sess:
             total_iterations += 1
             if total_iterations == 40000:
                 break
-

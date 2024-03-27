@@ -10,6 +10,8 @@ import importlib
 from default_config.masif_opts import masif_opts
 
 # Apply mask to input_feat
+
+
 def mask_input_feat(input_feat, mask):
     mymask = np.where(np.array(mask) == 0.0)[0]
     return np.delete(input_feat, mymask, axis=2)
@@ -94,11 +96,10 @@ for count, ppi_pair_id in enumerate(ppi_list):
 
     pdbid = ppi_pair_id.split("_")[0]
     chain1 = ppi_pair_id.split("_")[1]
-    if len(ppi_pair_id.split("_")) > 2: 
+    if len(ppi_pair_id.split("_")) > 2:
         chain2 = ppi_pair_id.split("_")[2]
     else:
         chain2 = ''
-
 
     # Read shape complementarity labels if chain2 != ''
     if chain2 != '':
@@ -106,8 +107,8 @@ for count, ppi_pair_id in enumerate(ppi_list):
             labels = np.load(in_dir + "p1" + "_sc_labels.npy")
             mylabels = labels[0]
             labels = np.median(mylabels, axis=1)
-        except:# Exception, e:
-            print('Could not open '+in_dir+'p1'+'_sc_labels.npy: '+str(e))
+        except BaseException:  # Exception, e:
+            print('Could not open ' + in_dir + 'p1' + '_sc_labels.npy: ' + str(e))
             continue
         print("Number of vertices: {}".format(len(labels)))
 
@@ -119,14 +120,12 @@ for count, ppi_pair_id in enumerate(ppi_list):
     else:
         l = []
 
-
-
     if len(l) > 0 and chain2 != "":
         ply_fn1 = masif_opts['ply_file_template'].format(pdbid, chain1)
         v1 = pymesh.load_mesh(ply_fn1).vertices[l]
         from sklearn.neighbors import NearestNeighbors
 
-        ply_fn2 = masif_opts['ply_file_template'].format(pdbid, chain2 )
+        ply_fn2 = masif_opts['ply_file_template'].format(pdbid, chain2)
         v2 = pymesh.load_mesh(ply_fn2).vertices
 
         # For each point in v1, find the closest point in v2.
@@ -148,7 +147,7 @@ for count, ppi_pair_id in enumerate(ppi_list):
     pid = "p1"
     try:
         p1_rho_wrt_center = np.load(in_dir + pid + "_rho_wrt_center.npy")
-    except:
+    except BaseException:
         continue
     p1_theta_wrt_center = np.load(in_dir + pid + "_theta_wrt_center.npy")
     p1_input_feat = np.load(in_dir + pid + "_input_feat.npy")
@@ -279,4 +278,3 @@ if len(all_pos_dists) > 0:
     )
     np.save(params["desc_dir"] + "/all_pos_dists_pos_neg.npy", all_pos_dists_pos_neg)
     np.save(params["desc_dir"] + "/all_neg_dists_pos_neg.npy", all_neg_dists_pos_neg)
-

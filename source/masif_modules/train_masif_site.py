@@ -6,6 +6,8 @@ from IPython.core.debugger import set_trace
 from sklearn.metrics import accuracy_score, roc_auc_score
 
 # Apply mask to input_feat
+
+
 def mask_input_feat(input_feat, mask):
     mymask = np.where(np.array(mask) == 0.0)[0]
     return np.delete(input_feat, mymask, axis=2)
@@ -76,7 +78,7 @@ def train_masif_site(
     np.random.shuffle(data_dirs)
     data_dirs = data_dirs
     n_val = len(data_dirs) // 10
-    val_dirs = set(data_dirs[(len(data_dirs) - n_val) :])
+    val_dirs = set(data_dirs[(len(data_dirs) - n_val):])
 
     for num_iter in range(num_iterations):
         # Start training epoch:
@@ -111,7 +113,7 @@ def train_masif_site(
             chains1 = ppi_pair_id.split("_")[1]
             if len(ppi_pair_id.split("_")) > 2:
                 chains2 = ppi_pair_id.split("_")[2]
-            else: 
+            else:
                 chains2 = ''
             pids = []
             if pdbid + "_" + chains1 in training_list:
@@ -121,7 +123,7 @@ def train_masif_site(
             for pid in pids:
                 try:
                     iface_labels = np.load(mydir + pid + "_iface_labels.npy")
-                except:
+                except BaseException:
                     continue
                 if len(iface_labels) > 8000:
                     continue
@@ -231,7 +233,7 @@ def train_masif_site(
             chains1 = ppi_pair_id.split("_")[1]
             if len(ppi_pair_id.split("_")) > 2:
                 chains2 = ppi_pair_id.split("_")[2]
-            else: 
+            else:
                 chains2 = ''
             pids = []
             if pdbid + "_" + chains1 in testing_list:
@@ -242,7 +244,7 @@ def train_masif_site(
                 logfile.write("Testing on {} {}\n".format(ppi_pair_id, pid))
                 try:
                     iface_labels = np.load(mydir + pid + "_iface_labels.npy")
-                except:
+                except BaseException:
                     continue
                 if len(iface_labels) > 20000:
                     continue

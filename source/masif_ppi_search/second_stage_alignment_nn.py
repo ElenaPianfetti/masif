@@ -7,8 +7,8 @@ from geometry.open3d_import import *
 import numpy as np
 import os
 from alignment_utils_masif_search import compute_nn_score, rand_rotation_matrix, \
-        get_center_and_random_rotate, get_patch_geo, multidock, test_alignments, \
-       subsample_patch_coords 
+    get_center_and_random_rotate, get_patch_geo, multidock, test_alignments, \
+    subsample_patch_coords
 from transformation_training_data.score_nn import ScoreNN
 from scipy.spatial import cKDTree
 from Bio.PDB import *
@@ -21,20 +21,20 @@ import sys
 second_stage_alignment_nn.py: Second stage alignment code for benchmarking MaSIF-search.
                             This code benchmarks MaSIF-search by generating 3D alignments
                             of the protein.
-                            The method consists of two stages: 
-                            (1) Read a database of MaSIF-search fingerprint descriptors for each overlapping patch, and find the top K decoys that are the most similar to the 
-                            target 
+                            The method consists of two stages:
+                            (1) Read a database of MaSIF-search fingerprint descriptors for each overlapping patch, and find the top K decoys that are the most similar to the
+                            target
                             (2) Align and score these patches:
                                 (2a) Use the RANSAC algorithm + the iterative closest point algorithm to align each patch
                                 (2b) Use a pre trained neural network to score the alignment.
-                            
+
 Pablo Gainza and Freyr Sverrisson - LPDI STI EPFL 2019
 Released under an Apache License 2.0
 """
 
 
-# Start measuring the cpu clock time here. 
-# We will not count the time required to align the structures and verify the ground truth. 
+# Start measuring the cpu clock time here.
+# We will not count the time required to align the structures and verify the ground truth.
 #               This time will be subtracted at the end.
 global_start_time = time.clock()
 global_ground_truth_time = 0.0
@@ -57,7 +57,7 @@ ransac_iter = int(sys.argv[3])
 num_success = int(sys.argv[4])
 method = sys.argv[5]
 
-# Location of surface (ply) files. 
+# Location of surface (ply) files.
 surf_dir = os.path.join(data_dir, masif_opts["ply_chain_dir"])
 
 if method == "gif":
@@ -74,7 +74,7 @@ precomp_dir_9A = os.path.join(
     data_dir, masif_opts["site"]["masif_precomputation_dir"]
 )
 
-# List of PDBID_CHAIN1_CHAIN2 ids that will be used in this benchmark. 
+# List of PDBID_CHAIN1_CHAIN2 ids that will be used in this benchmark.
 benchmark_list = "../benchmark_list.txt"
 
 
@@ -82,7 +82,7 @@ pdb_list = open(benchmark_list).readlines()[0:100]
 pdb_list = [x.rstrip() for x in pdb_list]
 
 """
-This is where the actual protocol starts. 
+This is where the actual protocol starts.
 """
 
 # Read all surfaces.
@@ -90,7 +90,7 @@ all_pc = []
 all_desc = []
 
 rand_list = np.copy(pdb_list)
-#np.random.seed(0)
+# np.random.seed(0)
 np.random.shuffle(rand_list)
 rand_list = rand_list[0:100]
 
@@ -99,7 +99,7 @@ p2_point_clouds = []
 p2_patch_coords = []
 p2_names = []
 
-# First we read in all the decoy 'binder' shapes. 
+# First we read in all the decoy 'binder' shapes.
 # Read all of p2. p2 will have straight descriptors.
 for i, pdb in enumerate(rand_list):
     print("Loading patch coordinates for {}".format(pdb))
@@ -116,7 +116,7 @@ for i, pdb in enumerate(rand_list):
         )
     )
 
-    # Read patch coordinates. 
+    # Read patch coordinates.
 
     pc = subsample_patch_coords(pdb, "p2", precomp_dir_9A)
     p2_patch_coords.append(pc)
@@ -135,7 +135,7 @@ all_negative_scores = []
 count_found = 0
 all_rankings_desc = []
 
-# Now go through each target (p1 in every case) and dock each 'decoy' binder to it. 
+# Now go through each target (p1 in every case) and dock each 'decoy' binder to it.
 # The target will have flipped (inverted) descriptors.
 for target_ix, target_pdb in enumerate(rand_list):
     cycle_start_time = time.clock()
@@ -202,7 +202,7 @@ for target_ix, target_pdb in enumerate(rand_list):
     # Make a ckdtree with the target.
     target_ckdtree = cKDTree(target_patch.points)
 
-    ## Load the structures of the target and the source (to get the ground truth).
+    # Load the structures of the target and the source (to get the ground truth).
     parser = PDBParser()
     target_struct = parser.get_structure(
         "{}_{}".format(target_pdb_id, chains[0]),
@@ -249,7 +249,7 @@ for target_ix, target_pdb in enumerate(rand_list):
         # Randomly rotate and translate.
         random_transformation = get_center_and_random_rotate(source_pcd)
         source_pcd.transform(random_transformation)
-        # Dock and score each matched patch. 
+        # Dock and score each matched patch.
         all_results, all_source_patch, all_source_scores = multidock(
             source_pcd,
             source_coords,
@@ -258,12 +258,12 @@ for target_ix, target_pdb in enumerate(rand_list):
             target_patch,
             target_patch_descs,
             target_ckdtree,
-            nn_model, 
+            nn_model,
             ransac_iter=ransac_iter
         )
         num_negs = num_negs
 
-        # If this is the source_pdb, get the ground truth. The ground truth evaluation time is ignored for this and all other methods. 
+        # If this is the source_pdb, get the ground truth. The ground truth evaluation time is ignored for this and all other methods.
         gt_start_time = time.clock()
         if source_pdb == target_pdb:
 
@@ -295,7 +295,7 @@ for target_ix, target_pdb in enumerate(rand_list):
         print('Descriptor rank: {}'.format(myrank_desc))
         print('Mean positive score: {}, mean negative score: {}'.format(np.mean(pos_scores), np.mean(neg_scores)))
         max_pos_score = np.max(pos_scores)
-        rank = np.sum(neg_scores > max_pos_score)+1
+        rank = np.sum(neg_scores > max_pos_score) + 1
         print('Neural network rank: {}'.format(rank))
         y_true = np.concatenate([np.zeros_like(pos_scores), np.ones_like(neg_scores)])
         y_pred = np.concatenate([pos_scores, neg_scores])
@@ -310,17 +310,17 @@ for target_ix, target_pdb in enumerate(rand_list):
     all_positive_scores.append(pos_scores)
     all_negative_scores.append(neg_scores)
     cycle_end_time = time.clock()
-    cycle_time = cycle_end_time-cycle_start_time - (gt_end_time - gt_start_time)
+    cycle_time = cycle_end_time - cycle_start_time - (gt_end_time - gt_start_time)
     print("Cycle took {:.2f} cpu seconds (excluding ground truth time) ".format(cycle_time))
     # Go through every top descriptor.
 
-# We stop measuring the time at this point. 
+# We stop measuring the time at this point.
 global_end_time = time.clock()
 
 # CPU time in minutes.
 global_cpu_time = global_end_time - global_start_time - global_ground_truth_time
-# Convert to minutes. 
-global_cpu_time = global_cpu_time/60
+# Convert to minutes.
+global_cpu_time = global_cpu_time / 60
 
 print("All alignments took {} min".format(global_cpu_time))
 
@@ -381,12 +381,12 @@ print(
 
 outfile = open("results_{}.txt".format(method), "a+")
 outfile.write("K,Total,Top2000,Top1000,Top100,Top10,Top5,Top1,MeanRMSD,Time(min)\n")
-top2000= np.sum(ranks<=2000)
-top1000= np.sum(ranks<=1000)
-top100= np.sum(ranks<=100)
-top10= np.sum(ranks<=10)
-top5= np.sum(ranks<=5)
-top1= np.sum(ranks<=1)
+top2000 = np.sum(ranks <= 2000)
+top1000 = np.sum(ranks <= 1000)
+top100 = np.sum(ranks <= 100)
+top10 = np.sum(ranks <= 10)
+top5 = np.sum(ranks <= 5)
+top1 = np.sum(ranks <= 1)
 meanrmsd = np.mean(rmsds)
 
 
@@ -396,4 +396,3 @@ outline = "{},{},{},{},{},{},{},{},{},{}\n".format(
 outfile.write(outline)
 
 outfile.close()
-

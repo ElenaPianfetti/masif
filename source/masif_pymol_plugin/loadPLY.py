@@ -1,6 +1,8 @@
 from pymol import cmd, stored
 import sys
-import os, math, re
+import os
+import math
+import re
 from pymol.cgo import *
 import os.path
 import numpy as np
@@ -27,6 +29,8 @@ colorDict = {
 }
 
 # Create a gradient color from color 1 to whitish, to color 2. val goes from 0 (color1) to 1 (color2).
+
+
 def color_gradient(vals, color1, color2):
     c1 = Color("white")
     c2 = Color("orange")
@@ -103,7 +107,7 @@ def charge_color(charges):
 def load_ply(
     filename, color="white", name="ply", dotSize=0.2, lineSize=0.5, doStatistics=False
 ):
-    ## Pymesh should be faster and supports binary ply files. However it is difficult to install with pymol...
+    # Pymesh should be faster and supports binary ply files. However it is difficult to install with pymol...
     #        import pymesh
     #        mesh = pymesh.load_mesh(filename)
 
@@ -122,7 +126,7 @@ def load_ply(
     try:
         charge = mesh.get_attribute("vertex_charge")
         color_array = charge_color(charge)
-    except:
+    except BaseException:
         print("Could not load vertex charges.")
         color_array = [colorDict["green"]] * len(verts)
     if "vertex_nx" in mesh.get_attribute_names():
@@ -466,4 +470,3 @@ def load_giface(filename, color="white", name="giface", dotSize=0.2, lineSize=1.
     # obj.append(END)
     name = "giface_verts_" + filename
     cmd.load_cgo(obj, name, 1.0)
-

@@ -55,7 +55,7 @@ for ppi_pair_id in ppi_pair_ids:
 
     if len(chains) == 1:
         pids = ['p1']
-    else: 
+    else:
         pids = ['p1', 'p2']
 
     for ix, pid in enumerate(pids):
@@ -71,14 +71,14 @@ for ppi_pair_id in ppi_pair_ids:
 
         try:
             p1 = pymesh.load_mesh(ply_file)
-        except:
+        except BaseException:
             print("File does not exist: {}".format(ply_file))
             continue
         try:
             scores = np.load(
                 params["out_pred_dir"] + "/pred_" + pdbid + "_" + chains[ix] + ".npy"
             )
-        except:
+        except BaseException:
             print(
                 "File does not exist: {}".format(
                     params["out_pred_dir"]
@@ -91,17 +91,16 @@ for ppi_pair_id in ppi_pair_ids:
             )
             continue
 
-
         mymesh = p1
 
         ground_truth = mymesh.get_attribute('vertex_iface')
-        # Compute ROC AUC for this protein. 
+        # Compute ROC AUC for this protein.
         try:
             roc_auc = roc_auc_score(ground_truth, scores[0])
             all_roc_auc_scores.append(roc_auc)
-            print("ROC AUC score for protein {} : {:.2f} ".format(pdbid+'_'+chains[ix], roc_auc))
-        except: 
-            print("No ROC AUC computed for protein (possibly, no ground truth defined in input)") 
+            print("ROC AUC score for protein {} : {:.2f} ".format(pdbid + '_' + chains[ix], roc_auc))
+        except BaseException:
+            print("No ROC AUC computed for protein (possibly, no ground truth defined in input)")
 
         mymesh.remove_attribute("vertex_iface")
         mymesh.add_attribute("iface")

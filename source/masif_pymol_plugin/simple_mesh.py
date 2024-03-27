@@ -59,7 +59,7 @@ class Simple_mesh:
         for i in range(face_line_start, face_line_start + self.num_faces):
             try:
                 fields = lines[i].split(" ")
-            except:
+            except BaseException:
                 ipdb.set_trace()
             face = [int(x) for x in fields[1:]]
             self.faces.append(face)
@@ -74,4 +74,3 @@ class Simple_mesh:
 
     def get_attribute(self, attribute_name):
         return np.copy(self.attributes[attribute_name])
-

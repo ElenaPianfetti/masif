@@ -12,17 +12,17 @@ from default_config.masif_opts import masif_opts
 import sys
 
 """
-second_stage_alignment.py: Second stage alignment code for benchmarking MaSIF-search WITHOUT neural network scoring. 
+second_stage_alignment.py: Second stage alignment code for benchmarking MaSIF-search WITHOUT neural network scoring.
                             It is recommended to use masif_second_stage_nn.py instead.
                             This code benchmarks MaSIF-search by generating 3D alignments
                             of the protein.
-                            The method consists of two stages: 
-                            (1) Read a database of MaSIF-search fingerprint descriptors for each overlapping patch, and find the top K decoys that are the most similar to the 
-                            target 
+                            The method consists of two stages:
+                            (1) Read a database of MaSIF-search fingerprint descriptors for each overlapping patch, and find the top K decoys that are the most similar to the
+                            target
                             (2) Align and score these patches:
                                 (2a) Use the RANSAC algorithm + the iterative closest point algorithm to align each patch
                                 (2b) Use a simple function based on the fingerprints of all aligned points to score the alignment
-                            
+
 Pablo Gainza  and Freyr Sverrisson- LPDI STI EPFL 2019
 Released under an Apache License 2.0
 """
@@ -124,7 +124,7 @@ def get_patch_geo(
     pcd, patch_coords, center, descriptors, outward_shift=0.25, flip=False
 ):
     """
-        Get a patch based on geodesic distances. 
+        Get a patch based on geodesic distances.
         pcd: the point cloud.
         patch_coords: the geodesic distances.
         center: the index of the center of the patch
@@ -157,7 +157,7 @@ def multidock(
     ransac_radius=1.0,
 ):
     """
-    Multi-docking protocol: Here is where the alignment is actually made. 
+    Multi-docking protocol: Here is where the alignment is actually made.
     This method aligns each of the K prematched decoy patches to the target using tehe
     RANSAC algorithm followed by icp
     """
@@ -191,8 +191,8 @@ def multidock(
             ],
             RANSACConvergenceCriteria(ransac_iter, 500), random_seed
         )
-        result = registration_icp(source_patch, target_pcd, 
-            1.0, result.transformation, TransformationEstimationPointToPlane())
+        result = registration_icp(source_patch, target_pcd,
+                                  1.0, result.transformation, TransformationEstimationPointToPlane())
         ransac_time = ransac_time + (time.time() - tic)
 
         tic = time.time()
@@ -225,7 +225,7 @@ def test_alignments(
     interface_dist=10.0,
 ):
     """
-    Verify the alignment against the ground truth. 
+    Verify the alignment against the ground truth.
     """
     structure_coords = np.array(
         [
@@ -276,7 +276,7 @@ def compute_desc_dist_score(
     target_pcd, source_pcd, corr, target_desc, source_desc, cutoff=2.0
 ):
     """
-        compute_desc_dist_score: a simple scoring based on fingerprints 
+        compute_desc_dist_score: a simple scoring based on fingerprints
     """
 
     # Compute scores based on correspondences.
@@ -288,7 +288,7 @@ def compute_desc_dist_score(
         source_p = corr[:, 0]
         try:
             dists_cutoff = target_desc.data[:, target_p] - source_desc.data[:, source_p]
-        except:
+        except BaseException:
             set_trace()
         dists_cutoff = np.sqrt(np.sum(np.square(dists_cutoff.T), axis=1))
         inliers = len(corr)
@@ -308,15 +308,14 @@ def subsample_patch_coords(pdb, pid, cv=None):
         subsample_patch_coords: Read the geodesic coordinates in an easy to access format.
         pdb: the id of the protein pair in PDBID_CHAIN1_CHAIN2 format.
         pid: 'p1' if you want to read CHAIN1, 'p2' if you want to read CHAIN2
-        cv: central vertex 
+        cv: central vertex
     """
 
     if cv is None:
-        pc = np.load(os.path.join(precomp_dir_9A, pdb, pid+'_list_indices.npy'))
+        pc = np.load(os.path.join(precomp_dir_9A, pdb, pid + '_list_indices.npy'))
     else:
         pc = {}
-        pc[cv] = np.load(os.path.join(precomp_dir_9A, pdb, pid+'_list_indices.npy'))[cv]
-
+        pc[cv] = np.load(os.path.join(precomp_dir_9A, pdb, pid + '_list_indices.npy'))[cv]
 
     return pc
 
@@ -433,7 +432,7 @@ for target_ix, target_pdb in enumerate(rand_list):
         target_pcd, target_coord, center_point, target_desc, flip=True
     )
 
-    ## Load the structures of the target and the source (to get the ground truth).
+    # Load the structures of the target and the source (to get the ground truth).
     parser = PDBParser()
     target_struct = parser.get_structure(
         "{}_{}".format(target_pdb_id, chains[0]),
@@ -597,12 +596,12 @@ print(
 
 outfile = open("results_{}.txt".format(method), "a+")
 outfile.write("K,Total,Top2000,Top1000,Top100,Top10,Top5,Top1,MeanRMSD,Time\n")
-top2000= np.sum(ranks<=2000)
-top1000= np.sum(ranks<=1000)
-top100= np.sum(ranks<=100)
-top10= np.sum(ranks<=10)
-top5= np.sum(ranks<=5)
-top1= np.sum(ranks<=1)
+top2000 = np.sum(ranks <= 2000)
+top1000 = np.sum(ranks <= 1000)
+top100 = np.sum(ranks <= 100)
+top10 = np.sum(ranks <= 10)
+top5 = np.sum(ranks <= 5)
+top1 = np.sum(ranks <= 1)
 meanrmsd = np.mean(rmsds)
 runtime = np.sum(all_time_global)
 
@@ -615,4 +614,3 @@ outfile.write(outline)
 outfile.close()
 
 sys.exit(0)
-
