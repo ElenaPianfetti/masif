@@ -5,6 +5,8 @@ import pymesh
 import time
 import numpy as np
 
+import sys
+
 from geometry.compute_polar_coordinates import compute_polar_coordinates
 from input_output.save_ply import save_ply
 
@@ -72,7 +74,6 @@ def read_data_from_surface(ply_fn, params):
     for vix in range(n):
         # Patch members.
         neigh_vix = np.array(neigh_indices[vix])
-
         # Compute the distance-dependent curvature for all neighbors of the patch.
         patch_v = mesh.vertices[neigh_vix]
         patch_n = normals[neigh_vix]

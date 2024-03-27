@@ -16,6 +16,10 @@ import time
 from scipy.sparse import csr_matrix, coo_matrix
 import pymesh
 
+import warnings
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=FutureWarning)
+
 
 def compute_polar_coordinates(mesh, do_fast=True, radius=12, max_vertices=200):
     """
@@ -84,15 +88,15 @@ def compute_polar_coordinates(mesh, do_fast=True, radius=12, max_vertices=200):
     else:
         theta = compute_theta_all(D, vertices, faces, normals, idx, radius)
 
-    # Output a few patches for debugging purposes.
-    # extract a patch
-    # for i in [0,100,500,1000,1500,2000]:
-    #    neigh = D[i].nonzero()
-    #    ii = np.where(D[i][neigh] < radius)[1]
-    #    neigh_i = neigh[1][ii]
-    #    subv, subn, subf = extract_patch(mesh, neigh_i, i)
-    #    # Output the patch's rho and theta coords
-    #    output_patch_coords(subv, subf, subn, i, neigh_i, theta[i], D[i, :])
+            # Output a few patches for debugging purposes.
+            # extract a patch
+            # for i in [0,100,500,1000,1500,2000]:
+            #    neigh = D[i].nonzero()
+            #    ii = np.where(D[i][neigh] < radius)[1]
+            #    neigh_i = neigh[1][ii]
+            #    subv, subn, subf = extract_patch(mesh, neigh_i, i)
+            #    # Output the patch's rho and theta coords
+            #    output_patch_coords(subv, subf, subn, i, neigh_i, theta[i], D[i, :])
 
     mds_end_t = time.clock()
     print('MDS took {:.2f}s'.format((mds_end_t - mds_start_t)))
@@ -291,8 +295,6 @@ def output_patch_coords(subv, subf, subn, i, neigh_i, theta, rho):
 
     pymesh.save_mesh('v{}.ply'.format(i), mesh, *mesh.get_attribute_names(), use_float=True, ascii=True)
 
-# @jit
-
 
 def call_mds(mds_obj, pair_dist):
     return mds_obj.fit_transform(pair_dist)
@@ -342,7 +344,10 @@ def compute_theta_all_fast(D, vertices, faces, normals, idx, radius):
 
         # Plane_i: the 2D plane for all neighbors of i
         tic = time.clock()
-        plane_i = call_mds(mymds, pair_dist_i)
+        # TODO: Fix FutureWarning
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=FutureWarning)
+            plane_i = call_mds(mymds, pair_dist_i)
         toc = time.clock()
         only_mds += (toc - tic)
 
